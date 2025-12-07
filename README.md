@@ -1,10 +1,71 @@
-# Flutter Application
+# OTC Flutter 应用
 
-这是一个Flutter跨平台应用项目，支持Android、iOS、Web、Windows、Linux和macOS平台。
+这是一个基于 Flutter 的 OTC（场外交易）应用，支持 Android、iOS、Web、Windows、Linux 和 macOS 平台。
 
 ## 项目简介
 
-这是一个基础的Flutter应用示例，包含一个简单的计数器功能。应用使用Material Design设计风格，展示了Flutter的基本开发模式。
+这是一个 OTC 交易平台应用，提供用户交易、订单管理、资产查看等功能。
+
+## 今日完成工作（最新更新）
+
+### 1. 修复登录页面问题
+- ✅ 修复了 `TextFormField` 中 `initialValue` 和 `controller` 不能同时使用的问题
+- ✅ 将默认值设置改为在 `initState` 中通过 `controller.text` 设置
+- ✅ 添加了 `dispose` 方法释放资源
+
+### 2. 修复 macOS 网络权限问题
+- ✅ 在 `DebugProfile.entitlements` 和 `Release.entitlements` 中添加了 `com.apple.security.network.client` 权限
+- ✅ 优化了 `Info.plist` 中的 App Transport Security (ATS) 配置
+- ✅ 解决了 "Operation not permitted" 网络连接错误
+
+### 3. 修复数据解析问题
+- ✅ 修复了首页佣金列表数据解析问题（从 `response.data['data']` 正确提取列表）
+- ✅ 修复了交易统计数据的类型转换问题（`Map<String, dynamic>` 转 `Map<String, double>`）
+- ✅ 修复了交易列表数据解析问题（正确处理 `List<Map>` 转 `List<SaleAdModel>`）
+
+### 4. 创建交易卡片组件
+- ✅ 创建了独立的 `TransactionCard` 组件（`lib/tabbars/transaction/components/transaction_card.dart`）
+- ✅ 优化了 UI 设计：
+  - 添加了商户头像图标
+  - 优化了支付方式标签样式（添加图标和边框）
+  - 重新设计了价格和限额展示（卡片式布局）
+  - 优化了底部信息展示（添加图标）
+- ✅ 将银行卡支付方式颜色改为红色
+
+### 5. 创建发布广告页面
+- ✅ 实现了完整的发布广告表单（`lib/tabbars/transaction/publish.dart`）
+- ✅ 实现了所有字段：
+  - 位置/国家选择
+  - 法币选择
+  - 溢价输入（0-5%）
+  - 价格显示（自动计算：汇率 + 溢价）
+  - 数量输入（显示将获得的金额）
+  - 最大/最小交易金额
+  - 支付方式多选
+  - 支付时间（固定 15 分钟）
+- ✅ 集成了相关 API：
+  - 获取国家/法币列表
+  - 获取汇率
+  - 获取用户资产
+  - 获取用户信息
+  - 提交发布广告
+- ✅ 实现了表单验证和提交逻辑
+
+### 6. 创建通用响应类
+- ✅ 创建了 `CommonResponse<T>` 通用响应类（`lib/utils/common.dart`）
+- ✅ 支持泛型，`data` 字段类型可变，`code` 和 `message` 固定
+- ✅ 添加了 `fromJson` 工厂方法，支持自定义数据转换
+- ✅ 添加了 `toJson` 方法，便于序列化
+
+### 7. 创建数据模型
+- ✅ 创建了 `CurrencyContryData` 数据模型（国家/法币数据）
+- ✅ 创建了 `SaleAdModel` 数据模型（交易广告数据）
+- ✅ 所有模型都包含 `fromJson` 和 `toJson` 方法
+
+### 8. 代码优化
+- ✅ 优化了错误处理和日志记录
+- ✅ 改进了代码结构和可读性
+- ✅ 添加了必要的注释
 
 ## 环境要求
 
@@ -29,8 +90,6 @@
 
 ### 1. 检查Flutter环境
 
-首先检查Flutter是否正确安装：
-
 ```bash
 flutter doctor
 ```
@@ -39,204 +98,119 @@ flutter doctor
 
 ### 2. 安装项目依赖
 
-在项目根目录下运行：
-
 ```bash
 flutter pub get
 ```
 
-这将下载并安装 `pubspec.yaml` 中定义的所有依赖包。
-
 ### 3. 运行项目
-
-根据目标平台选择相应的运行命令：
-
-#### 在Android设备/模拟器上运行
 
 ```bash
 # 查看可用的设备
 flutter devices
 
-# 运行到Android设备
-flutter run
-
-# 或者指定设备ID运行
+# 运行到指定设备
 flutter run -d <device-id>
-```
 
-#### 在iOS设备/模拟器上运行（仅macOS）
-
-```bash
-# 查看可用的iOS设备
-flutter devices
-
-# 运行到iOS设备
-flutter run
-
-# 或者指定设备ID运行
-flutter run -d <device-id>
-```
-
-#### 在Web浏览器中运行
-
-```bash
-# 运行到Chrome浏览器
-flutter run -d chrome
-
-# 运行到Edge浏览器
-flutter run -d edge
-```
-
-#### 在桌面平台运行
-
-```bash
 # macOS
 flutter run -d macos
 
-# Windows
-flutter run -d windows
+# iOS
+flutter run -d ios
 
-# Linux
-flutter run -d linux
+# Android
+flutter run -d android
 ```
-
-### 4. 热重载（Hot Reload）
-
-应用运行后，你可以使用以下方式快速查看代码更改：
-
-- **在IDE中**：点击热重载按钮（⚡图标）或按快捷键
-- **在命令行中**：按 `r` 键进行热重载
-- **完全重启**：按 `R` 键进行热重启（会重置应用状态）
 
 ## 项目结构
 
 ```
-flutter_application/
-├── lib/
-│   └── main.dart          # 应用主入口文件
-├── android/               # Android平台相关配置
-├── ios/                   # iOS平台相关配置
-├── web/                   # Web平台相关配置
-├── windows/               # Windows平台相关配置
-├── linux/                 # Linux平台相关配置
-├── macos/                 # macOS平台相关配置
-├── test/                  # 测试文件
-├── pubspec.yaml           # 项目依赖配置文件
-└── README.md             # 项目说明文档
+lib/
+├── api/                    # API 服务
+│   └── api_service.dart
+├── components/             # 公共组件
+│   ├── selectCurrency/     # 法币选择组件
+│   └── selectPayment/      # 支付方式选择组件
+├── tabbars/                # 主要页面
+│   ├── bootstrap/          # 启动/登录页面
+│   ├── home/               # 首页
+│   ├── transaction/        # 交易页面
+│   │   ├── components/     # 交易相关组件
+│   │   │   ├── transaction_card.dart
+│   │   │   └── transaction_action_button.dart
+│   │   ├── publish.dart    # 发布广告页面
+│   │   ├── transaction.dart
+│   │   └── saleAdModel.dart
+│   ├── order/              # 订单页面
+│   └── settings/           # 设置页面
+├── utils/                  # 工具类
+│   ├── common.dart         # 通用响应类
+│   ├── constant.dart       # 常量定义
+│   ├── http_client.dart    # HTTP 客户端
+│   └── http_interceptor.dart # HTTP 拦截器
+└── main.dart               # 应用入口
 ```
 
 ## 主要功能
 
-当前应用包含以下功能：
+1. **用户认证**：登录、注册、忘记密码
+2. **交易市场**：查看交易广告、筛选、发布广告
+3. **订单管理**：查看订单、订单详情
+4. **资产管理**：查看资产、充值、提币
+5. **个人中心**：用户信息、设置
 
-1. **计数器功能**：点击浮动按钮可以增加计数
-2. **Material Design UI**：使用Flutter的Material组件库
-3. **响应式布局**：适配不同屏幕尺寸
+## 技术栈
 
-## 开发说明
-
-### 代码结构
-
-- `main.dart`：应用入口，包含 `MyApp` 和 `MyHomePage` 两个主要组件
-- `MyApp`：应用的根组件，配置主题和路由
-- `MyHomePage`：主页面，包含计数器逻辑和UI
-
-### 修改代码
-
-1. 打开 `lib/main.dart` 文件
-2. 修改代码后保存
-3. 使用热重载功能查看更改效果
-
-### 添加依赖
-
-在 `pubspec.yaml` 文件的 `dependencies` 部分添加所需包，然后运行：
-
-```bash
-flutter pub get
-```
-
-## 构建发布版本
-
-### Android APK
-
-```bash
-flutter build apk
-```
-
-### Android App Bundle（用于Google Play）
-
-```bash
-flutter build appbundle
-```
-
-### iOS（仅macOS）
-
-```bash
-flutter build ios
-```
-
-### Web
-
-```bash
-flutter build web
-```
-
-### 桌面应用
-
-```bash
-# macOS
-flutter build macos
-
-# Windows
-flutter build windows
-
-# Linux
-flutter build linux
-```
+- **Flutter**：跨平台 UI 框架
+- **Dio**：HTTP 客户端
+- **SharedPreferences**：本地存储
+- **Material Design**：UI 设计规范
 
 ## 常见问题
 
-### 1. Flutter命令未找到
+### macOS 网络连接被拒绝
 
-确保Flutter已添加到系统PATH环境变量中。在macOS/Linux上，可以编辑 `~/.zshrc` 或 `~/.bash_profile`：
+如果出现 "Operation not permitted" 错误，请确保：
+1. 已在 `macos/Runner/DebugProfile.entitlements` 和 `macos/Runner/Release.entitlements` 中添加了 `com.apple.security.network.client` 权限
+2. 已重新构建应用：`flutter clean && flutter run`
+
+### 数据解析错误
+
+如果遇到类型转换错误，请确保：
+1. 使用 `CommonResponse<T>` 正确解析 API 响应
+2. 数据模型类实现了 `fromJson` 方法
+3. 正确处理空值和类型检查
+
+## 开发说明
+
+### 代码规范
+
+- 使用 `CommonResponse<T>` 处理所有 API 响应
+- 数据模型类必须实现 `fromJson` 和 `toJson` 方法
+- 组件应该独立且可复用
+- 添加必要的注释和错误处理
+
+### 提交代码
 
 ```bash
-export PATH="$PATH:/path/to/flutter/bin"
+# 添加所有更改
+git add .
+
+# 提交更改
+git commit -m "描述你的更改"
+
+# 推送到远程仓库
+git push
 ```
 
-### 2. 设备未连接
+## 更新日志
 
-- Android：确保已启用USB调试，或启动Android模拟器
-- iOS：确保设备已信任，或启动iOS模拟器
-
-### 3. 依赖安装失败
-
-尝试清理并重新安装：
-
-```bash
-flutter clean
-flutter pub get
-```
-
-### 4. 构建失败
-
-运行 `flutter doctor` 检查环境配置，确保所有必要的工具都已正确安装。
-
-## 学习资源
-
-- [Flutter官方文档](https://docs.flutter.dev/)
-- [Flutter中文网](https://flutter.cn/)
-- [Dart语言教程](https://dart.dev/guides)
-
-## 项目改进计划
-
-- [ ] 添加更多功能模块
-- [ ] 优化UI设计
-- [ ] 添加状态管理（如Provider、Riverpod等）
-- [ ] 添加网络请求功能
-- [ ] 添加本地存储功能
-- [ ] 完善错误处理和日志记录
+### 2024-12-XX（今日）
+- 完成交易卡片组件和发布广告页面
+- 创建通用响应类和数据模型
+- 修复多个数据解析和类型转换问题
+- 修复 macOS 网络权限问题
 
 ---
 
 **注意**：首次运行项目时，Flutter可能需要下载一些平台特定的依赖，这可能需要一些时间。请耐心等待。
+

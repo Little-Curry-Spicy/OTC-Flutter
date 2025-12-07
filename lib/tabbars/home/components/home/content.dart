@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application/api/api_service.dart';
 
 class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
@@ -9,16 +12,39 @@ class HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<HomeContent> {
   // 模拟订单数据
-  final List<Map<String, String>> _orders = List.generate(
-    10,
-    (index) => {
-      'orderNo': '1234567890${index.toString().padLeft(2, '0')}',
-      'amount': '${1000000 + index * 1000} USDT',
-      'price': '${0.9 + index * 0.1}',
-      'date': '2025-10-11',
-      'time': '${10 + index}:00:00',
-    },
-  );
+  List<Map<String, dynamic>> _orders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOrders();
+  }
+
+  void _loadOrders() async {
+    try {
+      final response = await ApiService.getCommissionList({'count': 8});
+      log('load: $response');
+
+      // 检查响应数据
+      if (response.data is Map<String, dynamic>) {
+        final responseData = response.data as Map<String, dynamic>;
+
+        // 检查业务状态码
+        final code = responseData['code'];
+        if (code == 0) {
+          // 获取数据列表
+          final data = responseData['data'];
+          if (data is List) {
+            setState(() {
+              _orders = List<Map<String, dynamic>>.from(data);
+            });
+          }
+        }
+      }
+    } catch (e) {
+      log('加载订单失败: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,113 +63,114 @@ class _HomeContentState extends State<HomeContent> {
             ),
           ],
         ),
-        child: Column(
-          children: List.generate(_orders.length, (index) {
-            final order = _orders[index];
-            final isLast = index == _orders.length - 1;
+        child:
+            _orders.isNotEmpty
+                ? Column(
+                  children: List.generate(_orders.length, (index) {
+                    final order = _orders[index];
+                    final isLast = index == _orders.length - 1;
 
-            return Column(
-              children: [
-                _buildOrderItem(order),
-                if (!isLast)
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: Colors.grey.shade100,
-                    indent: 16,
-                    endIndent: 16,
-                  ),
-              ],
-            );
-          }),
-        ),
+                    return Column(
+                      children: [
+                        _buildOrderItem(order),
+                        if (!isLast)
+                          Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: Colors.grey.shade100,
+                            indent: 16,
+                            endIndent: 16,
+                          ),
+                      ],
+                    );
+                  }),
+                )
+                : SizedBox(
+                  height: 200,
+                  width: double.infinity,
+                  child: Center(child: Text('暂无数据')),
+                ),
       ),
     );
   }
 
   // 构建订单项
-  Widget _buildOrderItem(Map<String, String> order) {
-    return InkWell(
-      onTap: () {
-        // TODO: 跳转到订单详情
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 左侧图标
-            Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.wallet,
-                color: Theme.of(context).primaryColor,
-                size: 22,
-              ),
+  Widget _buildOrderItem(Map<String, dynamic> order) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 左侧图标
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
             ),
-            SizedBox(width: 12),
-            // 中间订单信息
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 订单号
-                  Text(
-                    '订单号：${order['orderNo']!}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade700,
-                      height: 1.4,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  // 订单金额
-                  Text(
-                    '订单金额：${order['amount']!}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
+            child: Icon(
+              Icons.wallet,
+              color: Theme.of(context).primaryColor,
+              size: 22,
             ),
-            SizedBox(width: 12),
-            // 右侧金额和时间
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+          ),
+          SizedBox(width: 12),
+          // 中间订单信息
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 金额
+                // 订单号
                 Text(
-                  '￥${order['price']!}',
+                  '订单号：${order['orderNo'] ?? '未知'}',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
-                    height: 1.2,
+                    fontSize: 14,
+                    color: Colors.grey.shade700,
+                    height: 1.4,
                   ),
                 ),
                 SizedBox(height: 8),
-                // 日期和时间
+                // 订单金额
                 Text(
-                  '${order['date']!} ${order['time']!}',
+                  '订单金额：${order['orderAmount'] ?? '0'}',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade500,
-                    height: 1.2,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                    height: 1.4,
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          SizedBox(width: 12),
+          // 右侧金额和时间
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // 金额
+              Text(
+                '${order['quantity'] ?? '0'}U',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                  height: 1.2,
+                ),
+              ),
+              SizedBox(height: 8),
+              // 日期和时间
+              Text(
+                '${order['postOn'] ?? ''}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade500,
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

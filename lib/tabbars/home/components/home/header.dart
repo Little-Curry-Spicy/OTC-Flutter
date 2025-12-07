@@ -40,7 +40,6 @@ class _HomeHeaderState extends State<HomeHeader> {
         if (data is Map<String, dynamic> && data['code'] == 0) {
           setState(() {
             _indexData = data['data'];
-            log('首页数据: $_indexData');
             _loadRate(_indexData!['currency']);
             _isLoading = false;
           });
@@ -63,7 +62,6 @@ class _HomeHeaderState extends State<HomeHeader> {
   Future<void> _loadRate(String currency) async {
     try {
       final response = await ApiService.getUSDTRate({'currency': currency});
-      log('汇率数据: $response');
       if (response.statusCode == 200) {
         final data = response.data;
         if (data is Map<String, dynamic> && data['code'] == 0) {
@@ -114,32 +112,7 @@ class _HomeHeaderState extends State<HomeHeader> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 顶部导航栏
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Logo区域
-              Row(
-                children: [
-                  Image.asset('assets/images/logo.png', width: 100, height: 60),
-                ],
-              ),
-              // 消息图标
-              IconButton(
-                onPressed: () {
-                  // TODO: 跳转到消息页面
-                },
-                icon: Icon(
-                  Icons.message_outlined,
-                  color: Colors.black87,
-                  size: 24,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(),
-              ),
-            ],
-          ),
+          Image.asset('assets/images/logo.png', width: 100, height: 60),
           SizedBox(height: 16),
           // 总资产估值
           Column(

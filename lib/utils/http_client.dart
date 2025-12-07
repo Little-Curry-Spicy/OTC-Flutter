@@ -84,7 +84,5 @@ class HttpClient {
 
 /// API配置
 class ApiConfig {
-  // 如果服务器支持HTTPS，建议使用HTTPS
-  // static const String baseUrl = 'https://otc-api-dev.ibitpay.io/';
   static const String baseUrl = 'http://otc-api-dev.ibitpay.io/';
 }

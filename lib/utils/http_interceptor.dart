@@ -25,10 +25,6 @@ class HttpInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    // 打印响应日志
-    log('✅ Response: ${response.statusCode} ${response.requestOptions.uri}');
-    log('📦 Response Data: ${response.data}');
-
     // 处理响应数据
     if (response.data is Map<String, dynamic>) {
       final data = response.data as Map<String, dynamic>;

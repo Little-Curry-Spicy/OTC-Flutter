@@ -16,6 +16,23 @@ class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
   String _selectedLanguage = 'zh-CN'; // 默认中文
+
+  @override
+  void initState() {
+    super.initState();
+    // 在初始化时设置默认值
+    _emailController.text = '2939117014@qq.com';
+    _passwordController.text = '123456';
+  }
+
+  @override
+  void dispose() {
+    // 释放资源
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_application/api/api_service.dart';
 
 class HomeMain extends StatefulWidget {
   const HomeMain({super.key});
@@ -8,6 +11,30 @@ class HomeMain extends StatefulWidget {
 }
 
 class _HomeMainState extends State<HomeMain> {
+  Map<String, double>? _indexData = {'balance': 0, 'commission': 0};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadIndexInfo();
+  }
+
+  Future<void> _loadIndexInfo() async {
+    try {
+      final response = await ApiService.getIndexInfo();
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['code'] == 0) {
+          setState(() {
+            _indexData = data['data'];
+          });
+        }
+      }
+    } catch (e) {
+      log('获取首页数据失败: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -30,7 +57,7 @@ class _HomeMainState extends State<HomeMain> {
             // 返佣账户行
             _buildAccountRow(
               accountName: '返佣账户',
-              balance: '1000000 USDT',
+              balance: '${_indexData?['commission']} USDT',
               onTap: () {
                 // TODO: 跳转到返佣账户详情
               },
@@ -46,7 +73,7 @@ class _HomeMainState extends State<HomeMain> {
             // 交易账户行
             _buildAccountRow(
               accountName: '交易账户',
-              balance: '0.00000000 USDT',
+              balance: '${_indexData?['balance']} USDT',
               onTap: () {
                 // TODO: 跳转到交易账户详情
               },
